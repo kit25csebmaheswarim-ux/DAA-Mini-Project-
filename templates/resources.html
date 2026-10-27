@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">📦 Resources</h1>
+    <p class="page-subtitle">Browse and manage all available resources</p>
+</div>
+
+<!-- ===== SEARCH & FILTER FORM ===== -->
+<div class="filter-panel">
+    <form method="GET" action="{{ url_for('resources') }}" id="filterForm">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="search">🔍 Search</label>
+                <input type="text" id="search" name="search" placeholder="Search by name, category, location..."
+                       value="{{ search }}" class="form-control">
+            </div>
+
+            <div class="filter-group">
+                <label for="category">📂 Category</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category }}" {% if selected_category == cat.category %}selected{% endif %}>
+                        {{ cat.category }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="status">📌 Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    <option value="Available"   {% if selected_status == 'Available'   %}selected{% endif %}>Available</option>
+                    <option value="Allocated"   {% if selected_status == 'Allocated'   %}selected{% endif %}>Allocated</option>
+                    <option value="Maintenance" {% if selected_status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="location">📍 Location</label>
+                <input type="text" id="location" name="location" placeholder="Filter by location..."
+                       value="{{ selected_location }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">🔍 Apply Filters</button>
+            <a href="{{ url_for('resources') }}" class="btn btn-secondary">✖ Clear Filters</a>
+        </div>
+    </form>
+</div>
+
+<!-- ===== RESOURCE COUNT ===== -->
+<div class="results-count">
+    Showing <strong>{{ resources | length }}</strong> resource(s)
+</div>
+
+<!-- ===== RESOURCE CARDS ===== -->
+{% if resources %}
+<div class="resource-grid">
+    {% for resource in resources %}
+    <div class="resource-card">
+        <div class="resource-card-header">
+            <div class="resource-category-icon">
+                {% if resource.category == 'Computer Lab' %}💻
+                {% elif resource.category == 'Projector' %}📽️
+                {% elif resource.category == 'Laptop' %}🖥️
+                {% elif resource.category == 'Seminar Hall' %}🏛️
+                {% elif resource.category == 'Classroom' %}🎓
+                {% elif resource.category == 'Printer' %}🖨️
+                {% else %}📦{% endif %}
+            </div>
+            <span class="badge badge-{{ resource.status.lower() }}">{{ resource.status }}</span>
+        </div>
+
+        <div class="resource-card-body">
+            <h3 class="resource-name">{{ resource.name }}</h3>
+            <p class="resource-meta">
+                <span>📂 {{ resource.category }}</span>
+            </p>
+            <p class="resource-meta">
+                <span>📍 {{ resource.location }}</span>
+            </p>
+            {% if resource.capacity %}
+            <p class="resource-meta">
+                <span>👥 Capacity: {{ resource.capacity }}</span>
+            </p>
+            {% endif %}
+            {% if resource.description %}
+            <p class="resource-desc">{{ resource.description[:80] }}{% if resource.description|length > 80 %}...{% endif %}</p>
+            {% endif %}
+        </div>
+
+        <div class="resource-card-footer">
+            <a href="{{ url_for('resource_details', resource_id=resource.id) }}" class="btn btn-sm btn-info">
+                👁 View Details
+            </a>
+            {% if resource.status == 'Available' %}
+            <a href="{{ url_for('request_resource') }}?resource_id={{ resource.id }}" class="btn btn-sm btn-primary">
+                📝 Request
+            </a>
+            {% else %}
+            <button class="btn btn-sm btn-disabled" disabled>
+                {% if resource.status == 'Allocated' %}🔒 In Use{% else %}🔧 Maintenance{% endif %}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <p>No resources found matching your filters.</p>
+    <a href="{{ url_for('resources') }}" class="btn btn-secondary">Clear Filters</a>
+</div>
+{% endif %}
+
+{% endblock %}

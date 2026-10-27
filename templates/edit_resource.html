@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Resource - Admin{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div class="header-with-back">
+        <a href="{{ url_for('admin') }}" class="btn btn-secondary btn-sm">← Back to Admin</a>
+        <h1 class="page-title">✏️ Edit Resource</h1>
+    </div>
+</div>
+
+{% if errors %}
+<div class="error-list">
+    <strong>❌ Please fix the following errors:</strong>
+    <ul>
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="POST" action="{{ url_for('edit_resource', resource_id=resource.id) }}">
+
+        <div class="form-group">
+            <label for="name">📦 Resource Name <span class="required">*</span></label>
+            <input type="text" id="name" name="name" class="form-control"
+                   value="{{ resource.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">📂 Category <span class="required">*</span></label>
+            <select id="category" name="category" class="form-control" required>
+                {% set cats = ['Computer Lab', 'Projector', 'Laptop', 'Seminar Hall', 'Classroom', 'Printer', 'Other'] %}
+                {% for cat in cats %}
+                <option value="{{ cat }}" {% if resource.category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="location">📍 Location <span class="required">*</span></label>
+            <input type="text" id="location" name="location" class="form-control"
+                   value="{{ resource.location }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="capacity">👥 Capacity (optional)</label>
+            <input type="number" id="capacity" name="capacity" class="form-control"
+                   value="{{ resource.capacity or '' }}" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="description">📋 Description (optional)</label>
+            <textarea id="description" name="description" class="form-control" rows="3">{{ resource.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="status">📌 Status</label>
+            <select id="status" name="status" class="form-control">
+                <option value="Available"   {% if resource.status == 'Available'   %}selected{% endif %}>Available</option>
+                <option value="Allocated"   {% if resource.status == 'Allocated'   %}selected{% endif %}>Allocated</option>
+                <option value="Maintenance" {% if resource.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{{ url_for('admin') }}" class="btn btn-secondary">✖ Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resource.name }} - Resource Details{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div class="header-with-back">
+        <a href="{{ url_for('resources') }}" class="btn btn-secondary btn-sm">← Back to Resources</a>
+        <h1 class="page-title">
+            {% if resource.category == 'Computer Lab' %}💻
+            {% elif resource.category == 'Projector' %}📽️
+            {% elif resource.category == 'Laptop' %}🖥️
+            {% elif resource.category == 'Seminar Hall' %}🏛️
+            {% elif resource.category == 'Classroom' %}🎓
+            {% else %}📦{% endif %}
+            {{ resource.name }}
+        </h1>
+    </div>
+</div>
+
+<!-- ===== RESOURCE DETAIL CARD ===== -->
+<div class="detail-grid">
+    <div class="detail-card">
+        <h2 class="detail-section-title">📋 Resource Information</h2>
+        <div class="detail-table">
+            <div class="detail-row">
+                <span class="detail-key">Resource Name</span>
+                <span class="detail-value">{{ resource.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Category</span>
+                <span class="detail-value">{{ resource.category }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Location</span>
+                <span class="detail-value">📍 {{ resource.location }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Capacity</span>
+                <span class="detail-value">
+                    {% if resource.capacity %}👥 {{ resource.capacity }} persons{% else %}N/A{% endif %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Current Status</span>
+                <span class="detail-value">
+                    <span class="badge badge-{{ resource.status.lower() }}">{{ resource.status }}</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Description</span>
+                <span class="detail-value">{{ resource.description or 'No description available.' }}</span>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            {% if resource.status == 'Available' %}
+            <a href="{{ url_for('request_resource') }}?resource_id={{ resource.id }}" class="btn btn-primary">
+                📝 Request This Resource
+            </a>
+            {% elif resource.status == 'Allocated' %}
+            <button class="btn btn-disabled" disabled>🔒 Currently Allocated</button>
+            {% else %}
+            <button class="btn btn-disabled" disabled>🔧 Under Maintenance</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ===== RECENT ALLOCATIONS ===== -->
+    <div class="detail-card">
+        <h2 class="detail-section-title">📅 Recent Allocations</h2>
+        {% if allocations %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Requester</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in allocations %}
+                <tr>
+                    <td>{{ a.requester_name }}</td>
+                    <td>{{ a.date }}</td>
+                    <td>{{ a.start_time }} – {{ a.end_time }}</td>
+                    <td>{{ a.purpose[:40] }}{% if a.purpose|length > 40 %}...{% endif %}</td>
+                    <td><span class="badge badge-{{ a.status.lower() }}">{{ a.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state-sm">
+            <p>No allocations found for this resource.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

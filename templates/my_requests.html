@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}My Requests - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">📋 My Requests</h1>
+    <p class="page-subtitle">View all submitted resource requests and their current status</p>
+    <a href="{{ url_for('request_resource') }}" class="btn btn-primary">📝 New Request</a>
+</div>
+
+<!-- ===== REQUESTS TABLE ===== -->
+<div class="table-container">
+    {% if requests %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Requester</th>
+                <th>Email</th>
+                <th>Resource</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>#{{ req.id }}</td>
+                <td>{{ req.requester_name }}</td>
+                <td>{{ req.email }}</td>
+                <td>{{ req.resource_name }}</td>
+                <td>{{ req.date }}</td>
+                <td>{{ req.start_time }} – {{ req.end_time }}</td>
+                <td>{{ req.purpose[:50] }}{% if req.purpose|length > 50 %}...{% endif %}</td>
+                <td>
+                    <span class="badge badge-{{ req.status.lower() }}">{{ req.status }}</span>
+                </td>
+                <td>{{ req.created_at[:16] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No requests found. Submit your first resource request!</p>
+        <a href="{{ url_for('request_resource') }}" class="btn btn-primary">📝 Request a Resource</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ===== STATUS LEGEND ===== -->
+<div class="legend">
+    <h4>📌 Status Guide</h4>
+    <div class="legend-items">
+        <span class="badge badge-pending">Pending</span> — Waiting for admin approval
+        <span class="badge badge-approved">Approved</span> — Request approved and resource allocated
+        <span class="badge badge-rejected">Rejected</span> — Request was rejected by admin
+        <span class="badge badge-completed">Completed</span> — Allocation period is over
+    </div>
+</div>
+
+{% endblock %}

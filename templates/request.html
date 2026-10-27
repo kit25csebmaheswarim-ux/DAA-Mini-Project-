@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Request Resource - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">📝 Request a Resource</h1>
+    <p class="page-subtitle">Fill in the form below to request a resource. Requests are subject to admin approval.</p>
+</div>
+
+<!-- ===== VALIDATION ERRORS ===== -->
+{% if errors %}
+<div class="error-list">
+    <strong>❌ Please fix the following errors:</strong>
+    <ul>
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- ===== REQUEST FORM ===== -->
+<div class="form-container">
+    <form method="POST" action="{{ url_for('request_resource') }}" id="requestForm">
+
+        <!-- Requester Name -->
+        <div class="form-group">
+            <label for="requester_name">👤 Requester Name <span class="required">*</span></label>
+            <input type="text" id="requester_name" name="requester_name" class="form-control"
+                   placeholder="Enter your full name"
+                   value="{{ form_data.get('requester_name', '') }}" required>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email">📧 Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="Enter your email address"
+                   value="{{ form_data.get('email', '') }}" required>
+        </div>
+
+        <!-- Resource -->
+        <div class="form-group">
+            <label for="resource_id">📦 Select Resource <span class="required">*</span></label>
+            <select id="resource_id" name="resource_id" class="form-control" required>
+                <option value="">-- Select a Resource --</option>
+                {% for res in resources %}
+                <option value="{{ res.id }}"
+                    {% if form_data.get('resource_id', selected_resource_id) == res.id|string %}selected{% endif %}>
+                    {{ res.name }} ({{ res.category }}) - {{ res.location }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+            <label for="date">📅 Date <span class="required">*</span></label>
+            <input type="date" id="date" name="date" class="form-control"
+                   value="{{ form_data.get('date', '') }}" required>
+        </div>
+
+        <!-- Start & End Time -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_time">🕐 Start Time <span class="required">*</span></label>
+                <input type="time" id="start_time" name="start_time" class="form-control"
+                       value="{{ form_data.get('start_time', '') }}" required>
+            </div>
+            <div class="form-group">
+                <label for="end_time">🕐 End Time <span class="required">*</span></label>
+                <input type="time" id="end_time" name="end_time" class="form-control"
+                       value="{{ form_data.get('end_time', '') }}" required>
+            </div>
+        </div>
+
+        <!-- Availability Check Result -->
+        <div id="availability-result" class="availability-result" style="display:none;"></div>
+
+        <!-- Purpose -->
+        <div class="form-group">
+            <label for="purpose">📋 Purpose <span class="required">*</span></label>
+            <textarea id="purpose" name="purpose" class="form-control" rows="4"
+                      placeholder="Describe the purpose of this resource request...">{{ form_data.get('purpose', '') }}</textarea>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="form-actions">
+            <button type="button" id="checkAvailBtn" class="btn btn-info">
+                🔍 Check Availability
+            </button>
+            <button type="submit" class="btn btn-primary">
+                📤 Submit Request
+            </button>
+            <a href="{{ url_for('resources') }}" class="btn btn-secondary">
+                ✖ Cancel
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<!-- ===== INFO BOX ===== -->
+<div class="info-box">
+    <h4>ℹ️ How it works</h4>
+    <ol>
+        <li>Fill in the form with your details and select a resource.</li>
+        <li>Choose a date and time for the resource.</li>
+        <li>Click <strong>Check Availability</strong> to see if the resource is free.</li>
+        <li>Submit the request. It will be marked as <strong>Pending</strong>.</li>
+        <li>The admin reviews and approves or rejects the request.</li>
+        <li>Once approved, an allocation is created automatically.</li>
+    </ol>
+</div>
+
+{% endblock %}

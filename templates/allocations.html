@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Allocations - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">📅 Allocation History</h1>
+    <p class="page-subtitle">View all approved resource allocations</p>
+</div>
+
+<!-- ===== FILTERS ===== -->
+<div class="filter-panel">
+    <form method="GET" action="{{ url_for('allocations') }}">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="resource_id">📦 Filter by Resource</label>
+                <select id="resource_id" name="resource_id" class="form-control">
+                    <option value="">All Resources</option>
+                    {% for res in all_resources %}
+                    <option value="{{ res.id }}" {% if filter_resource == res.id|string %}selected{% endif %}>
+                        {{ res.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="date">📅 Filter by Date</label>
+                <input type="date" id="date" name="date" class="form-control"
+                       value="{{ filter_date }}">
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">🔍 Apply Filter</button>
+            <a href="{{ url_for('allocations') }}" class="btn btn-secondary">✖ Clear</a>
+        </div>
+    </form>
+</div>
+
+<!-- ===== ALLOCATIONS TABLE ===== -->
+<div class="table-container">
+    {% if allocations %}
+    <p class="results-count">Showing <strong>{{ allocations | length }}</strong> allocation(s)</p>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Alloc. ID</th>
+                <th>Resource</th>
+                <th>Requester</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Purpose</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alloc in allocations %}
+            <tr>
+                <td>#{{ alloc.id }}</td>
+                <td>{{ alloc.resource_name }}</td>
+                <td>{{ alloc.requester_name }}</td>
+                <td>{{ alloc.date }}</td>
+                <td>{{ alloc.start_time }}</td>
+                <td>{{ alloc.end_time }}</td>
+                <td>{{ alloc.purpose[:50] }}{% if alloc.purpose|length > 50 %}...{% endif %}</td>
+                <td><span class="badge badge-{{ alloc.status.lower() }}">{{ alloc.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <p>No allocations found.</p>
+        <a href="{{ url_for('request_resource') }}" class="btn btn-primary">📝 Submit a Request</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

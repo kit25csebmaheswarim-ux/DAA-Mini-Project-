@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<!-- ===== PAGE HEADER ===== -->
+<div class="page-header">
+    <h1 class="page-title">📊 Dashboard</h1>
+    <p class="page-subtitle">Welcome to the Resource Allocation System</p>
+</div>
+
+<!-- ===== STATS CARDS ===== -->
+<div class="stats-grid">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.total_resources }}</div>
+            <div class="stat-label">Total Resources</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.available_resources }}</div>
+            <div class="stat-label">Available Resources</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-orange">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.allocated_resources }}</div>
+            <div class="stat-label">Allocated Resources</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-red">
+        <div class="stat-icon">🔧</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.maintenance_resources }}</div>
+            <div class="stat-label">Under Maintenance</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-purple">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.pending_requests }}</div>
+            <div class="stat-label">Pending Requests</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-teal">
+        <div class="stat-icon">✔️</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.approved_requests }}</div>
+            <div class="stat-label">Approved Requests</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== QUICK ACTIONS ===== -->
+<div class="section-title">⚡ Quick Actions</div>
+<div class="quick-actions">
+    <a href="{{ url_for('request_resource') }}" class="quick-btn btn-primary">
+        📝 Request a Resource
+    </a>
+    <a href="{{ url_for('resources') }}" class="quick-btn btn-secondary">
+        📦 Browse Resources
+    </a>
+    <a href="{{ url_for('my_requests') }}" class="quick-btn btn-info">
+        📋 View My Requests
+    </a>
+    <a href="{{ url_for('allocations') }}" class="quick-btn btn-success">
+        📅 View Allocations
+    </a>
+    <a href="{{ url_for('admin') }}" class="quick-btn btn-warning">
+        ⚙️ Admin Panel
+    </a>
+    <a href="{{ url_for('reports') }}" class="quick-btn btn-purple">
+        📈 View Reports
+    </a>
+</div>
+
+<!-- ===== RECENT REQUESTS TABLE ===== -->
+<div class="section-title">🕐 Recent Resource Requests</div>
+<div class="table-container">
+    {% if recent_requests %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Requester</th>
+                <th>Resource</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Purpose</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in recent_requests %}
+            <tr>
+                <td>#{{ req.id }}</td>
+                <td>{{ req.requester_name }}</td>
+                <td>{{ req.resource_name }}</td>
+                <td>{{ req.date }}</td>
+                <td>{{ req.start_time }} – {{ req.end_time }}</td>
+                <td>{{ req.purpose[:40] }}{% if req.purpose|length > 40 %}...{% endif %}</td>
+                <td><span class="badge badge-{{ req.status.lower() }}">{{ req.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No requests submitted yet.</p>
+        <a href="{{ url_for('request_resource') }}" class="btn btn-primary">Submit First Request</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ===== REQUEST SUMMARY BARS ===== -->
+<div class="section-title">📊 Request Summary</div>
+<div class="summary-bars">
+    <div class="summary-row">
+        <span class="summary-label">Pending</span>
+        <div class="summary-bar-wrap">
+            <div class="summary-bar bar-pending" style="width: {{ (stats.pending_requests / stats.total_requests * 100) | int if stats.total_requests > 0 else 0 }}%"></div>
+        </div>
+        <span class="summary-count">{{ stats.pending_requests }}</span>
+    </div>
+    <div class="summary-row">
+        <span class="summary-label">Approved</span>
+        <div class="summary-bar-wrap">
+            <div class="summary-bar bar-approved" style="width: {{ (stats.approved_requests / stats.total_requests * 100) | int if stats.total_requests > 0 else 0 }}%"></div>
+        </div>
+        <span class="summary-count">{{ stats.approved_requests }}</span>
+    </div>
+    <div class="summary-row">
+        <span class="summary-label">Rejected</span>
+        <div class="summary-bar-wrap">
+            <div class="summary-bar bar-rejected" style="width: {{ (stats.rejected_requests / stats.total_requests * 100) | int if stats.total_requests > 0 else 0 }}%"></div>
+        </div>
+        <span class="summary-count">{{ stats.rejected_requests }}</span>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Resource Allocation System{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">⚙️ Admin Panel</h1>
+    <p class="page-subtitle">Manage resources and review all requests</p>
+    <a href="{{ url_for('add_resource') }}" class="btn btn-primary">➕ Add New Resource</a>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="tab-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="showTab('resources-tab', this)">📦 Resources ({{ resources|length }})</button>
+        <button class="tab-btn" onclick="showTab('requests-tab', this)">📋 All Requests ({{ requests|length }})</button>
+    </div>
+
+    <!-- ===== RESOURCES TAB ===== -->
+    <div id="resources-tab" class="tab-content active">
+        <div class="table-container">
+            {% if resources %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in resources %}
+                    <tr>
+                        <td>#{{ res.id }}</td>
+                        <td><strong>{{ res.name }}</strong></td>
+                        <td>{{ res.category }}</td>
+                        <td>{{ res.location }}</td>
+                        <td>{{ res.capacity or 'N/A' }}</td>
+                        <td><span class="badge badge-{{ res.status.lower() }}">{{ res.status }}</span></td>
+                        <td class="action-btns">
+                            <a href="{{ url_for('resource_details', resource_id=res.id) }}"
+                               class="btn btn-sm btn-info">👁 View</a>
+                            <a href="{{ url_for('edit_resource', resource_id=res.id) }}"
+                               class="btn btn-sm btn-warning">✏️ Edit</a>
+                            <form method="POST"
+                                  action="{{ url_for('delete_resource', resource_id=res.id) }}"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete {{ res.name }}?')">
+                                <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No resources found.</p>
+                <a href="{{ url_for('add_resource') }}" class="btn btn-primary">➕ Add Resource</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ===== REQUESTS TAB ===== -->
+    <div id="requests-tab" class="tab-content">
+        <div class="table-container">
+            {% if requests %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Requester</th>
+                        <th>Email</th>
+                        <th>Resource</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>#{{ req.id }}</td>
+                        <td>{{ req.requester_name }}</td>
+                        <td>{{ req.email }}</td>
+                        <td>{{ req.resource_name }}</td>
+                        <td>{{ req.date }}</td>
+                        <td>{{ req.start_time }} – {{ req.end_time }}</td>
+                        <td>{{ req.purpose[:40] }}{% if req.purpose|length > 40 %}...{% endif %}</td>
+                        <td><span class="badge badge-{{ req.status.lower() }}">{{ req.status }}</span></td>
+                        <td class="action-btns">
+                            {% if req.status == 'Pending' %}
+                            <form method="POST"
+                                  action="{{ url_for('approve_request', request_id=req.id) }}"
+                                  style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success">✅ Approve</button>
+                            </form>
+                            <form method="POST"
+                                  action="{{ url_for('reject_request', request_id=req.id) }}"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Reject request #{{ req.id }}?')">
+                                <button type="submit" class="btn btn-sm btn-danger">❌ Reject</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No requests found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
